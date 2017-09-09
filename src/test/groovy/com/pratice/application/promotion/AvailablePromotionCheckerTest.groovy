@@ -5,13 +5,12 @@ import com.pratice.domain.order.OrderFinder
 import com.pratice.domain.promotion.PromotionFinder
 import io.github.benas.randombeans.api.EnhancedRandom
 import spock.lang.Specification
+import spock.lang.Subject
 import spock.lang.Unroll
 
 import java.time.LocalDateTime
 
-import static com.pratice.application.promotion.PromotionType.COMMON
-import static com.pratice.application.promotion.PromotionType.FIRST_OVERSEAS
-import static com.pratice.application.promotion.PromotionType.FIRST_PURCHASE
+import static com.pratice.application.promotion.PromotionType.*
 import static java.time.LocalDateTime.now
 
 class AvailablePromotionCheckerTest extends Specification {
@@ -26,7 +25,7 @@ class AvailablePromotionCheckerTest extends Specification {
 
 	@Unroll
 	def "회원이 혜택을 받을 수 있는 프로모션의 리스트를 확인한다."() {
-		given:
+		given: "promotion, member, order Mock을 sut에 inject한다."
 		def promotionFinderMock = Mock(PromotionFinder) {
 			find(_) >> getPromotion(USED, START_AT, END_AT)
 		}
@@ -38,30 +37,31 @@ class AvailablePromotionCheckerTest extends Specification {
 			isExistOverseasPurchaseHistory(_) >> OVERSEAS_PURCHASE_HISTORY
 		}
 
+		@Subject
 		def sut = new AvailablePromotionChecker(
 				memberFinder: memberFinderMock,
 				orderFinder: orderFinderMock,
 				promotionFinder: promotionFinderMock
 		)
 
-		when:
+		when: "getAvailablePromotionList를 호출하여 사용자가 어떤 프로모션 혜택을 받을 수 있는지 확인한다."
 		List<PromotionType> checkResult = sut.getAvailablePromotionList(memberId, promotionId)
 
 		then:
 		checkResult.containsAll(RESULT)
 
-		where:
+		where: "체크 결과와 where의 RESULT를 비교한다."
 //		Promotion Conditions                                        | Member & Order Conditions
-		USED  | START_AT                 | END_AT                   | LOGIN  | PURCHASE_HISTORY | OVERSEAS_PURCHASE_HISTORY | RESULT
-		false | now().minusDays(1) | now().plusDays(1)  | false  | true             | true                      | []
-		true  | now().plusDays(1)  | now().plusDays(1)  | false  | true             | true                      | []
-		true  | now().minusDays(2) | now().minusDays(1) | false  | true             | true                      | []
-		true  | now().minusDays(1) | now().plusDays(1)  | false  | true             | true                      | []
-		true  | now().minusDays(1) | now().plusDays(1)  | false  | true             | true                      | []
+		USED  | START_AT                 | END_AT                   | LOGIN | PURCHASE_HISTORY | OVERSEAS_PURCHASE_HISTORY || RESULT
+		false | now().minusDays(1) | now().plusDays(1)  | false | true             | true                      || []
+		true  | now().plusDays(1)  | now().plusDays(1)  | false | true             | true                      || []
+		true  | now().minusDays(2) | now().minusDays(1) | false | true             | true                      || []
+		true  | now().minusDays(1) | now().plusDays(1)  | false | true             | true                      || []
+		true  | now().minusDays(1) | now().plusDays(1)  | false | true             | true                      || []
 
-		true  | now().minusDays(1) | now().plusDays(1)  | true   | true             | true                      | [COMMON]
-		true  | now().minusDays(1) | now().plusDays(1)  | true   | false            | true                      | [COMMON, FIRST_PURCHASE]
-		true  | now().minusDays(1) | now().plusDays(1)  | true   | false            | false                     | [COMMON, FIRST_PURCHASE, FIRST_OVERSEAS]
+		true  | now().minusDays(1) | now().plusDays(1)  | true  | true             | true                      || [COMMON]
+		true  | now().minusDays(1) | now().plusDays(1)  | true  | false            | true                      || [COMMON, FIRST_PURCHASE]
+		true  | now().minusDays(1) | now().plusDays(1)  | true  | false            | false                     || [COMMON, FIRST_PURCHASE, FIRST_OVERSEAS]
 	}
 
 	@Unroll("구매한 이력이 #PURCHASE_HISTORY 이면 결과는 #RESULT 이다.")
@@ -71,6 +71,7 @@ class AvailablePromotionCheckerTest extends Specification {
 			isExistPurchaseHistory(_) >> PURCHASE_HISTORY
 		}
 
+		@Subject
 		def sut = new AvailablePromotionChecker(
 				orderFinder: orderFinderMock
 		)
@@ -82,9 +83,9 @@ class AvailablePromotionCheckerTest extends Specification {
 		checkResult == RESULT
 
 		where:
-		PURCHASE_HISTORY | RESULT
-		true             | false
-		false            | true
+		PURCHASE_HISTORY || RESULT
+		true             || false
+		false            || true
 	}
 
 	@Unroll("해외구매한 이력이 #PURCHASE_HISTORY 이면 결과는 #RESULT 이다.")
@@ -94,6 +95,7 @@ class AvailablePromotionCheckerTest extends Specification {
 			isExistOverseasPurchaseHistory(_) >> PURCHASE_HISTORY
 		}
 
+		@Subject
 		def sut = new AvailablePromotionChecker(
 				orderFinder: orderFinderMock
 		)
@@ -105,9 +107,9 @@ class AvailablePromotionCheckerTest extends Specification {
 		checkResult == RESULT
 
 		where:
-		PURCHASE_HISTORY | RESULT
-		true             | false
-		false            | true
+		PURCHASE_HISTORY || RESULT
+		true             || false
+		false            || true
 	}
 
 	def getPromotion(Boolean used, LocalDateTime startAt, LocalDateTime endAt) {
