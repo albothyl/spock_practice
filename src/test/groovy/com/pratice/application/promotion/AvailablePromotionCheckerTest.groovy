@@ -23,7 +23,7 @@ class AvailablePromotionCheckerTest extends Specification {
 		promotionId = EnhancedRandom.random(Long.class)
 	}
 
-	@Unroll
+	@Unroll("Promotion Condition [USED : #USED | PromotionPeriod : #START_AT ~ #END_AT] Member and Order Condition[LOGIN : #LOGIN | PURCHASE_HISTORY : #PURCHASE_HISTORY | #OVERSEAS_PURCHASE_HISTORY] 이면 #RESULT 에 해당하는 Promotion의 혜택을 받을 수 있다.")
 	def "회원이 혜택을 받을 수 있는 프로모션의 리스트를 확인한다."() {
 		given: "promotion, member, order Mock을 sut에 inject한다."
 		def promotionFinderMock = Mock(PromotionFinder) {

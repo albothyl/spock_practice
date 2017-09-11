@@ -5,12 +5,14 @@ import com.pratice.domain.member.MemberFinder;
 import com.pratice.domain.order.OrderFinder;
 import com.pratice.domain.promotion.PromotionFinder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
 import static com.pratice.application.promotion.PromotionType.*;
 
+@Component
 public class AvailablePromotionChecker {
 
 	@Autowired
