@@ -25,7 +25,7 @@ public class AvailablePromotionChecker {
 	private PromotionFinder promotionFinder;
 
 
-	public List<PromotionType> getAvailablePromotionList(@Nonnull final Long memberId, final Long promotionId) {
+	public List<PromotionType> getAvailablePromotionList(@Nonnull final Long memberId, @Nonnull final Long promotionId) {
 
 		List<PromotionType> promotionList = Lists.newArrayList();
 
